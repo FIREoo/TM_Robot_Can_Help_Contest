@@ -16,9 +16,9 @@ import cv2
 import numpy as np
 
 # ========================= #
-import rospy
-from std_msgs.msg import String, Int32MultiArray, Float64MultiArray
-from cv_bridge import CvBridge, CvBridgeError
+# import rospy
+# from std_msgs.msg import String, Int32MultiArray, Float64MultiArray
+# from cv_bridge import CvBridge, CvBridgeError
 # ========================= #
 
 class VideoThread(QThread):
@@ -26,51 +26,51 @@ class VideoThread(QThread):
     img_yolo_signal = pyqtSignal(np.ndarray)
     img_plan_signal = pyqtSignal(np.ndarray)
     cap = cv2.VideoCapture(0)
-    rospy.init_node('user_interface_node', anonymous=True)
-    bridge = CvBridge()
-    cmd_publisher = rospy.Publisher('/plan_command', String, queue_size=1)
+    # rospy.init_node('user_interface_node', anonymous=True)
+    # bridge = CvBridge()
+    # cmd_publisher = rospy.Publisher('/plan_command', String, queue_size=1)
 
-    def img_hand_callback(self, data):
-        try:
-            cv_img = self.bridge.imgmsg_to_cv2(data, "bgr8")
-            self.img_hand_signal.emit(cv_img)
-        except CvBridgeError as e:
-            rospy.logerr('bridge error {e}')
+    # def img_hand_callback(self, data):
+    #     try:
+    #         cv_img = self.bridge.imgmsg_to_cv2(data, "bgr8")
+    #         self.img_hand_signal.emit(cv_img)
+    #     except CvBridgeError as e:
+    #         rospy.logerr('bridge error {e}')
 
-    def img_yolo_callback(self, data):
-        try:
-            cv_img = self.bridge.imgmsg_to_cv2(data, "bgr8")
-            self.img_yolo_signal.emit(cv_img)
-        except CvBridgeError as e:
-            rospy.logerr('bridge error {e}')
+    # def img_yolo_callback(self, data):
+    #     try:
+    #         cv_img = self.bridge.imgmsg_to_cv2(data, "bgr8")
+    #         self.img_yolo_signal.emit(cv_img)
+    #     except CvBridgeError as e:
+    #         rospy.logerr('bridge error {e}')
 
-    def img_plan_callback(self, data):
-        try:
-            cv_img = self.bridge.imgmsg_to_cv2(data, "bgr8")
-            self.img_plan_signal.emit(cv_img)
-        except CvBridgeError as e:
-            rospy.logerr('bridge error {e}')
+    # def img_plan_callback(self, data):
+    #     try:
+    #         cv_img = self.bridge.imgmsg_to_cv2(data, "bgr8")
+    #         self.img_plan_signal.emit(cv_img)
+    #     except CvBridgeError as e:
+    #         rospy.logerr('bridge error {e}')
 
-    def send_command(self, cmd):
-        rospy.wait_for_service('/pathplan/command')
-        try:
-            send_command_service = rospy.ServiceProxy('/pathplan/command', String)
-            resp1 = send_command_service(cmd)
-            return resp1.data
-        except rospy.ServiceException as e:
-            print("Service call failed: %s"%e)
+    # def send_command(self, cmd):
+    #     rospy.wait_for_service('/pathplan/command')
+    #     try:
+    #         send_command_service = rospy.ServiceProxy('/pathplan/command', String)
+    #         resp1 = send_command_service(cmd)
+    #         return resp1.data
+    #     except rospy.ServiceException as e:
+    #         print("Service call failed: %s"%e)
 
     def run(self):
-        rospy.Subscriber('/hand/image', Image, self.img_hand_callback, queue_size=1)
-        rospy.Subscriber('/yolo/image', Image, self.img_yolo_callback, queue_size=1)
-        rospy.Subscriber('/pathplan/image', Image, self.img_plan_callback, queue_size=1)
-        rospy.spin()
-        # while True:
-        #     ret, cv_img = self.cap.read()
-        #     if ret:
-        #         self.img_hand_signal.emit(cv_img)
-        #         self.img_yolo_signal.emit(cv_img)
-        #         self.img_plan_signal.emit(cv_img)
+        # rospy.Subscriber('/hand/image', Image, self.img_hand_callback, queue_size=1)
+        # rospy.Subscriber('/yolo/image', Image, self.img_yolo_callback, queue_size=1)
+        # rospy.Subscriber('/pathplan/image', Image, self.img_plan_callback, queue_size=1)
+        # rospy.spin()
+        while True:
+            ret, cv_img = self.cap.read()
+            if ret:
+                self.img_hand_signal.emit(cv_img)
+                self.img_yolo_signal.emit(cv_img)
+                self.img_plan_signal.emit(cv_img)
 
 
 class App(QtWidgets.QMainWindow):
@@ -272,30 +272,30 @@ class App(QtWidgets.QMainWindow):
         self.realImage.setPixmap(self.convert_cv_qt(image, 480, 360, Qt.KeepAspectRatio))
 
     def on_init_button_click(self):
-        self.thread.send_command("init")
+        # self.thread.send_command("init")
         self.detectButton.setEnabled(True)
 
     def on_detect_button_click(self):
-        self.thread.send_command("detect")
+        # self.thread.send_command("detect")
         self.removeButton.setEnabled(True)
         self.pauseButton.setEnabled(True)
         self.stopButton.setEnabled(True)
         self.startButton.setEnabled(True)
 
     def on_remove_button_click(self):
-        self.thread.send_command("remove_ng_pin")
+        # self.thread.send_command("remove_ng_pin")
         pass
 
     def on_pause_button_click(self):
-        self.thread.send_command("pause")
+        # self.thread.send_command("pause")
         pass
 
     def on_stop_button_click(self):
-        self.thread.send_command("end")
+        # self.thread.send_command("end")
         pass
 
     def on_start_button_click(self):
-        self.thread.send_command("start")
+        # self.thread.send_command("start")
         pass
 
     def convert_cv_qt(self, cv_img, width, height, mode=Qt.IgnoreAspectRatio):

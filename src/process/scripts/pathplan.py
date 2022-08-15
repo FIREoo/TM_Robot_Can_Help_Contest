@@ -44,7 +44,7 @@ place_points = np.array([(75, 225), (75, 150), (75, 75), (150, 225), (150, 150),
 place_points_in_robot_pos = np.array([(75, 225), (75, 150), (75, 75), (150, 75), (150, 150), (150, 225), (225, 75), (225, 150), (225, 225)], dtype=np.float64)  #robot base # unit: M
 reached_place_points = np.zeros(len(place_points), dtype=np.bool_)
 
-pick_points = np.array([(280, -45),(260, -45),(240, -45),(220, -45), (200, -45),(180, -45),(160, -45),(140, -45),(120, -45),(100, -45)], dtype=np.int32)
+pick_points = np.array([(-45, 20),(-45, 40),(-45, 60),(-45, 80), (-45, 100),(-45, 120),(-45, 140),(-45, 160),(-45, 180),(-45, 200)], dtype=np.int32)
 pick_points_in_robot_pos = np.array([(0.500, -0.180), (0.500, -0.180), (0.500, -0.180), (0.500, -0.180), (0.500, -0.180), (0.500, -0.180), (0.500, -0.180), (0.500, -0.180), (0.500, -0.180), (0.500, -0.180)], dtype=np.float64)  #robot base # unit: M
 reached_pick_points = np.ones(len(pick_points), dtype=np.bool_)
 pick_point_index = 0  #可以夾的，第一順位 index
@@ -414,8 +414,8 @@ def UpdateImage():
     global unit_vector
     hand = handshape + handpos
     img_process = np.ones(frameSize, dtype=np.uint8) * 100
-    img_process_sub = np.ones((100, 300, 3), dtype=np.uint8) * 150 #宣告頭頂一塊空間
-    cv2.rectangle(img_process_sub, (80, 30), (300, 80), (100, 100, 100), -1) #把小板的位置畫出來
+    img_process_sub = np.ones((300, 100, 3), dtype=np.uint8) * 150 #宣告頭頂一塊空間
+    cv2.rectangle(img_process_sub, (30, 0), (80, 220), (100, 100, 100), -1) #把小板的位置畫出來
     cv2.fillPoly(img_process, [hand], (100, 0, 200))
 
     # if status == "pick":
@@ -430,7 +430,7 @@ def UpdateImage():
     #         cv2.circle(img_process, robotPos, 10, (174, 214, 51), -1)
 
     # 高端繪圖法 一行解千愁
-    cv2.circle(img_process if robotPos[1]>=0 else img_process_sub, robotPos if robotPos[1]>=0 else robotPos-np.array([0, -100]), 10, (181, 24, 37) if FLAG_realMove else (174, 214, 51), -1 if status == "place" else 3)
+    cv2.circle(img_process if robotPos[0]>=0 else img_process_sub, robotPos if robotPos[0]>=0 else robotPos-np.array([-100, 0]), 10, (181, 24, 37) if FLAG_realMove else (174, 214, 51), -1 if status == "place" else 3)
     
     if (FLAG_realMove == True):
         unit_vector = FixCoordinate_vector(unit_vector)
@@ -449,14 +449,14 @@ def UpdateImage():
     # 繪製小板的十個點
     for i, p in enumerate(pick_points):
         if reached_pick_points[i] == 1:
-            cv2.circle(img_process_sub, p-np.array([0, -100]), 6, (150, 0, 150), -1)
+            cv2.circle(img_process_sub, p-np.array([-100, 0]), 6, (150, 0, 150), -1)
         elif reached_pick_points[i] == 2:
-            cv2.circle(img_process_sub, p-np.array([0, -100]), 6, (0, 0, 240), -1)
+            cv2.circle(img_process_sub, p-np.array([-100, 0]), 6, (0, 0, 240), -1)
         else:
-            cv2.circle(img_process_sub, p-np.array([0, -100]), 6, (0, 200, 200), -1)
+            cv2.circle(img_process_sub, p-np.array([-100, 0]), 6, (0, 200, 200), -1)
 
     #沒什麼意義複製,暫時先用來區分 畫一些無意義的文字
-    img_show = np.concatenate((img_process_sub, img_process), axis=0)
+    img_show = np.concatenate((img_process_sub, img_process), axis=1)
     if (FLAG_rotate == True):
         img_show = cv2.rotate(img_show, ROTATE_90_CLOCKWISE)
         cv2.putText(img_show, 'Rotate in view(r)', (100, 290), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 255), 1, cv2.LINE_AA)
@@ -479,7 +479,7 @@ def Delay(sec):
 
 def handle_commands(req):
     key = req.data
-    if key == 'i':
+    if key == 'init':
         status = "init"
     elif key == 'p':
         status = "pause"
