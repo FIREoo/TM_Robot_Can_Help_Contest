@@ -93,6 +93,9 @@ def img_callback(data):
             cv2.putText(img_detect, str(index_line), (p[0] + 6, p[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.4, color=(44, 222, 160), thickness=1)
 
     cv2.imshow('detect_image', img_detect)
+    #publish image
+    image_message = bridge.cv2_to_imgmsg(img_detect, "bgr8")
+    pub_yolo_image.publish(image_message)
 
     #state to string
     hole_status_msg = ''
@@ -119,7 +122,7 @@ def handle_NG_detection_service(req):
     img_detect = img_roboteye.copy()
     img_detect = cv2.resize(img_detect, (432, 324), interpolation=cv2.INTER_AREA)
 
-    classIds, scores, boxes = model.detect(img_detect, confThreshold=0.6, nmsThreshold=0.4)
+    classIds, scores, boxes = model.detect(img_detect, confThreshold=0.4, nmsThreshold=0.4)
 
     ng_status = np.zeros(10, dtype=int)
     for (classId, score, box) in zip(classIds, scores, boxes):
@@ -129,7 +132,7 @@ def handle_NG_detection_service(req):
 
         # 判斷hole的狀態  #利用找到的 YOLO位置 去尋找每一個 設定位置
         for i, pos in enumerate(hole_image_roboteye_pos):
-            if (distance(center(box), pos) < 8):
+            if (distance(center(box), pos) < 16):
                 if (classId == 4):  #bad pin
                     ng_status[i] = 2
                 break  #不會同時找到兩個 設定位置
@@ -137,12 +140,15 @@ def handle_NG_detection_service(req):
     # draw hole pose
     for i, p in enumerate(hole_image_roboteye_pos):
         if (ng_status[i] == 2):
-            cv2.circle(img_detect, p.astype('int32'), 4, (23, 34, 179), -1)
+            cv2.circle(img_detect, p.astype('int32'), 8, (23, 34, 179), -1)
         else:
-            cv2.circle(img_detect, p.astype('int32'), 4, (44, 222, 160), 1)
+            cv2.circle(img_detect, p.astype('int32'), 8, (44, 222, 160), 1)
         cv2.putText(img_detect, str(i), (p[0], p[1] - 6), cv2.FONT_HERSHEY_SIMPLEX, 0.4, color=(44, 222, 160), thickness=1)
 
     cv2.imshow('robot cam', img_detect)
+    image_message = bridge.cv2_to_imgmsg(img_detect, "bgr8")
+    pub_tm_yolo_image.publish(image_message)
+
     # #state to string
     ng_status_msg = ''
     for s in ng_status:
@@ -238,6 +244,8 @@ if __name__ == "__main__":
     model.setInputParams(scale=1 / 255, size=(detect_width, detect_height), swapRB=True)
 
     sub_image = rospy.Subscriber('/camera/image', Image, img_callback, queue_size=1)
+    pub_yolo_image = rospy.Publisher('/yolo/image', Image, queue_size=1)
+    pub_tm_yolo_image = rospy.Publisher('/tm_yolo/image', Image, queue_size=1)
     pub_hole_status_plate = rospy.Publisher('/hole_status/square', String, queue_size=1)
     pub_hole_status_line = rospy.Publisher('/hole_status', String, queue_size=1)
     s = rospy.Service('/ng_detect', Trigger, handle_NG_detection_service)

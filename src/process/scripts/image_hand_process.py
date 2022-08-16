@@ -1,3 +1,4 @@
+from contextlib import nullcontext
 import cv2
 import mediapipe as mp
 import imutils
@@ -74,9 +75,10 @@ def convexHull(points, n):
 rospy.init_node('hand_detector', anonymous=True)
 pub_hand = rospy.Publisher('hand_detector', String, queue_size=1)
 pub_image = rospy.Publisher('/camera/image', Image, queue_size=1)
+pub_hand_image = rospy.Publisher('/hand/image', Image, queue_size=1)
 
 #v4l2-ctl --list-devices
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 status = "init"
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
@@ -164,7 +166,7 @@ while not rospy.is_shutdown():
                 myhand = [Point(image.shape[1], 0), Point(image.shape[1], image.shape[0])]
                 for landmark in hand_landmarks.landmark:
                     handMask = 40
-                    # cv2.circle(mask, (int(landmark.x * image.shape[1]), int(landmark.y * image.shape[0])), handMask, 1, -1)  #make是做什麼的？？？
+                    # cv2.circle(mask, (int(landmark.x * image.shape[1]), int(landmark.y * image.shape[0])), handMask, 1, -1)  #mask是做什麼的？？？
                     if landmark.x < 0:
                         landmark.x = 0
                     if landmark.y < 0:
@@ -194,9 +196,14 @@ while not rospy.is_shutdown():
                 pub_hand.publish(data)
         else:
             dst = cv2.warpPerspective(image, trans, (300, 300))
+            data = json.dumps({"convex": []})
+            pub_hand.publish(data)
 
         cv2.putText(dst, '(q)Quit; (i)Detect Rect', (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 1, cv2.LINE_AA)
+
         cv2.imshow('frame', dst)
+        image_message = bridge.cv2_to_imgmsg(dst, "bgr8")
+        pub_hand_image.publish(image_message)
 
         # for point in points:
         #     if mask[point[1]][point[0]] != 0:
