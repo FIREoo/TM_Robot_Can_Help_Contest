@@ -20,7 +20,7 @@
       <x>510</x>
       <y>360</y>
       <width>302</width>
-      <height>331</height>
+      <height>337</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="handImageLayout">
@@ -70,7 +70,7 @@
       <x>840</x>
       <y>10</y>
       <width>386</width>
-      <height>319</height>
+      <height>325</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="yoloLayout">
@@ -126,7 +126,7 @@
       <x>200</x>
       <y>260</y>
       <width>302</width>
-      <height>431</height>
+      <height>437</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="pathplanLayout">
@@ -308,8 +308,8 @@
      <rect>
       <x>60</x>
       <y>50</y>
-      <width>529</width>
-      <height>110</height>
+      <width>557</width>
+      <height>114</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="titleLayout">
@@ -329,123 +329,6 @@
      </item>
     </layout>
    </widget>
-   <widget class="QWidget" name="verticalLayoutWidget_7">
-    <property name="geometry">
-     <rect>
-      <x>580</x>
-      <y>240</y>
-      <width>160</width>
-      <height>80</height>
-     </rect>
-    </property>
-    <layout class="QVBoxLayout" name="captionLayout">
-     <item>
-      <widget class="QCheckBox" name="captionHole">
-       <property name="styleSheet">
-        <string notr="true">QCheckBox::indicator
-{
-background-color : lightgreen;
-}
-QCheckBox::indicator
-{
-width : 20px;
-height : 20px;
-}
-QCheckBox {
-    spacing: 5px;
-    font-size:20px; 
-	font-weight: bold;
-}</string>
-       </property>
-       <property name="text">
-        <string>HOLE</string>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>20</width>
-         <height>20</height>
-        </size>
-       </property>
-       <property name="checkable">
-        <bool>false</bool>
-       </property>
-       <property name="checked">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QCheckBox" name="captionErrorPin">
-       <property name="styleSheet">
-        <string notr="true">QCheckBox::indicator
-{
-background-color : red;
-}
-QCheckBox::indicator
-{
-width : 20px;
-height : 20px;
-}
-QCheckBox {
-    spacing: 5px;
-    font-size:20px; 
-	font-weight: bold;
-}</string>
-       </property>
-       <property name="text">
-        <string>NG PIN</string>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>20</width>
-         <height>20</height>
-        </size>
-       </property>
-       <property name="checkable">
-        <bool>false</bool>
-       </property>
-       <property name="checked">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QCheckBox" name="captionPin">
-       <property name="styleSheet">
-        <string notr="true">QCheckBox::indicator
-{
-background-color : blue;
-}
-QCheckBox::indicator
-{
-width : 20px;
-height : 20px;
-}
-QCheckBox {
-    spacing: 5px;
-    font-size:20px; 
-	font-weight: bold;
-}</string>
-       </property>
-       <property name="text">
-        <string>PIN</string>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>20</width>
-         <height>20</height>
-        </size>
-       </property>
-       <property name="checkable">
-        <bool>false</bool>
-       </property>
-       <property name="checked">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -453,7 +336,7 @@ QCheckBox {
      <x>0</x>
      <y>0</y>
      <width>1280</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>

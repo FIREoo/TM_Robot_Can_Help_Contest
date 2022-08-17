@@ -78,7 +78,7 @@ pub_image = rospy.Publisher('/camera/image', Image, queue_size=1)
 pub_hand_image = rospy.Publisher('/hand/image', Image, queue_size=1)
 
 #v4l2-ctl --list-devices
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 status = "init"
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles

@@ -52,7 +52,7 @@ def img_callback(data):
     global LOCKER_model_processing
     try:
         if (LOCKER_model_processing == False):
-            classIds, scores, boxes = model.detect(img_detect, confThreshold=0.6, nmsThreshold=0.4)
+            classIds, scores, boxes = model.detect(img_detect, confThreshold=0.5, nmsThreshold=0.4)
         else:
             print('locker locked')
             return
@@ -122,7 +122,7 @@ def handle_NG_detection_service(req):
     img_detect = img_roboteye.copy()
     img_detect = cv2.resize(img_detect, (432, 324), interpolation=cv2.INTER_AREA)
 
-    classIds, scores, boxes = model.detect(img_detect, confThreshold=0.4, nmsThreshold=0.4)
+    classIds, scores, boxes = model.detect(img_detect, confThreshold=0.5, nmsThreshold=0.4)
 
     ng_status = np.zeros(10, dtype=int)
     for (classId, score, box) in zip(classIds, scores, boxes):

@@ -4,7 +4,7 @@ function順序問題  同類的擺在一起
 function命名只有功能  但可以加入是誰觸發的 例如callback_... / ..._handler / handle_...
 好多意義不明的數字 0.001, 200這些在計算的時候都要說明
 global 與 local 不要同名稱,  其實一大堆都應該寫在main裡面,減少使用global參數
-高端寫法很酷，我懂我懂，但...帥是一時的維護是永遠的阿。看懂優先，其次減少行數。（例如 ｃ的　？：這類的...以後舉例
+高端寫法很酷，我懂我懂，但...帥是一時的 維護是永遠的阿。看懂優先，其次減少行數。（例如 ｃ的　？：這類的...以後舉例
 
 #座標轉換
 有實體座標時，圖不能直接就轉換，除非是攝影機內部參數校正，這樣會把舊的圖片的座標直接忽略，（例如這次的底板角度問題。
@@ -32,12 +32,12 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 
 frameSize = (300, 300, 3)
-handpos = np.array([random.randint(100, frameSize[0] - 100), random.randint(100, frameSize[1] - 100)], dtype=np.int32)
 
 unit_vector = np.array([0, 1], dtype=np.int32)
 robot_img_pos = np.array([0, 300])  #image base
 robot_img_target = np.array([0, 0])
-handshape = np.array([[76, -28], [38, 50], [-40, 54], [-72, -24], [-2, -52]])
+handpos = np.array([300, 300], dtype=np.int32)
+handshape = np.array([[0, 0], [0, 0], [0, 0]])
 status = "pause"
 
 FLAG_realMove = True
@@ -66,12 +66,12 @@ robot_z_down = 0.277  #unit: M
 
 original_image_rect = np.float32([(0, 300), (300, 300), (300, 0), (0, 0)])
 # original_robot_rect = np.float32([(0.500, -0.180), (0.800, -0.180), (0.800, 0.120), (0.500, 0.120)])  #Unit: M
-original_robot_rect_mm = np.float32([(524.0, -203.9), (822.5, -227.2), (847.0, 70.9), (550.3, 96.0)])  #Unit: mm
+original_robot_rect_mm = np.float32([(540.3, -197.3), (838.8, -206.2), (850.6, 92.6), (552.9, 103.1)])  #Unit: mm
 trans_R2I = []
 trans_I2R = []
 
 ###parameters###
-hand_safe_distance = 50  #pixel
+hand_safe_distance = 75  #pixel
 
 bridge = CvBridge()
 pub_image = rospy.Publisher('/pathplan/image', Image, queue_size=1)
@@ -162,8 +162,8 @@ def set_points_to_robot_points():
     for i, p in enumerate(place_points):
         place_points_in_robot_pos[i] = np.float64(Image2Robot(place_points[i]) / 1000)
         #直接補償
-        place_points_in_robot_pos[i][0] += 0.000  #unit M
-        place_points_in_robot_pos[i][1] += -0.002  #unit M
+        place_points_in_robot_pos[i][0] += 0.003  #unit M
+        place_points_in_robot_pos[i][1] += -0.000  #unit M
     for i, p in enumerate(pick_points):
         pick_points_in_robot_pos[i] = np.float64(Image2Robot(pick_points[i]) / 1000)
 
@@ -384,7 +384,7 @@ def bot_move(target):
             sv += (x / x_len) * (safeDst - x_len)
 
     if np.linalg.norm(sv) > 1:  #如果overlap手的話
-        direction = np.array((-20, 0))  #圖片方向不一樣阿，明明就是向左！？
+        direction = np.array((-50, 0))  #圖片方向不一樣阿，明明就是向左！？
     else:  #沒有overlap任何東西, 正常走
         direction = target - robot_img_pos + sv
 
@@ -623,13 +623,17 @@ def handle_commands(req):
                 tm_send_gripper_client(True)
                 Delay(3)
                 tm_pose_to(pick_points_in_robot_pos[i][0] * 1000, pick_points_in_robot_pos[i][1] * 1000, robot_z_high * 1000, 80)
-                tm_send_script_client("PTP(\"JPP\",73.5,-27.3,117.7,89.3,-16.2,179.4,80,200,0,false)")  # trash pos #TM5-700
+                #在旁邊7cm的地方放置
+                tm_pose_to(pick_points_in_robot_pos[0][0] * 1000, pick_points_in_robot_pos[0][1] * 1000 + 70, robot_z_high * 1000, 80)
+                # tm_send_script_client("PTP(\"JPP\",73.5,-27.3,117.7,89.3,-16.2,179.4,80,200,0,false)")  # trash pos #TM5-700
                 Delay(3)
                 tm_send_gripper_client(False)
                 Delay(3)
 
                 #set to can not reached
                 pick_points_status[i] = 0
+        #switch to "end" when finish
+        status = "end"
     elif _cmd == "start":
         #initial pos
         tm_send_script_client("StopAndClearBuffer(0)")
@@ -647,7 +651,6 @@ def handle_commands(req):
     elif _cmd == "pause":
         status = "pause"
     elif _cmd == "end":
-
         status = "end"
 
 
@@ -732,6 +735,11 @@ def key_commands(k):
         tm_send_script_client("PTP(\"CPP\",%f,%f,%f,90.0,0,90,50,200,0,false)" % (original_robot_rect_mm[1][0] * 1000, original_robot_rect_mm[1][1] * 1000, robot_z_high * 1000))
         tm_send_script_client("PTP(\"CPP\",%f,%f,%f,90.0,0,90,50,200,0,false)" % (original_robot_rect_mm[2][0] * 1000, original_robot_rect_mm[2][1] * 1000, robot_z_high * 1000))
         tm_send_script_client("PTP(\"CPP\",%f,%f,%f,90.0,0,90,50,200,0,false)" % (original_robot_rect_mm[3][0] * 1000, original_robot_rect_mm[3][1] * 1000, robot_z_high * 1000))
+
+    elif key == ord('1'):
+        print('pick points status: index1 -> 1')
+        pick_points_status = np.zeros(len(pick_points), dtype=np.int8)
+        pick_points_status[0] = 1
     elif key == 170:  #numpad*
         #go reset pin
         print('clear pick points status')
